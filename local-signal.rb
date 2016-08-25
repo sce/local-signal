@@ -4,27 +4,30 @@ require 'rubygems'
 require 'bundler'
 Bundler.require :default
 
-origin = 'http://localhost:4000'
+origin = 'http://localhost:3000' # client urls
 
 $buffer = { server: [], client: [] }
+
+set :port, 4000
+
+before do
+  response['Access-Control-Allow-Origin'] = origin
+end
 
 # These are queue names. You can put something into a queue, or fetch an entry
 # from it.
 options '/server' do
   response['Access-Control-Allow-Methods'] = 'PUT'
-  response['Access-Control-Allow-Origin'] = origin
 end
 
 put '/server' do
   request.body.rewind
   $buffer[:server] << request.body.read
 
-  response['Access-Control-Allow-Origin'] = origin
   status 200
 end
 
 get '/server' do
-  response['Access-Control-Allow-Origin'] = origin
   $buffer[:server].shift
 end
 
@@ -32,19 +35,16 @@ end
 # Client queue:
 options '/client' do
   response['Access-Control-Allow-Methods'] = 'PUT'
-  response['Access-Control-Allow-Origin'] = origin
 end
 
 put '/client' do
   request.body.rewind
   $buffer[:client] << request.body.read
 
-  response['Access-Control-Allow-Origin'] = origin
   status 200
 end
 
 get '/client' do
-  response['Access-Control-Allow-Origin'] = origin
   $buffer[:client].shift
 end
 
